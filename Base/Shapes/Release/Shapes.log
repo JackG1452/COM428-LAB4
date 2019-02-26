@@ -1,0 +1,12 @@
+﻿  d3dApp.cpp
+c:\users\cgf17gij\desktop\com428-lab4-master\com428-lab4-master\base\shapes\common\d3dapp.cpp(22): error C2065: 'opaquePsoDesc': undeclared identifier
+c:\users\cgf17gij\desktop\com428-lab4-master\com428-lab4-master\base\shapes\common\d3dapp.cpp(22): error C2228: left of '.FillMode' must have class/struct/union
+  c:\users\cgf17gij\desktop\com428-lab4-master\com428-lab4-master\base\shapes\common\d3dapp.cpp(22): note: type is 'unknown-type'
+  d3dUtil.cpp
+c:\users\cgf17gij\desktop\com428-lab4-master\com428-lab4-master\base\shapes\common\d3dutil.cpp(30): warning C4244: 'argument': conversion from 'std::streamoff' to 'SIZE_T', possible loss of data
+c:\users\cgf17gij\desktop\com428-lab4-master\com428-lab4-master\base\shapes\common\d3dutil.cpp(70): warning C4244: '=': conversion from 'UINT64' to 'LONG_PTR', possible loss of data
+  GameTimer.cpp
+  GeometryGenerator.cpp
+  MathHelper.cpp
+  FrameResource.cpp
+  ShapesApp.cpp

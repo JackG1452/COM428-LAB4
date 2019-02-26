@@ -117,13 +117,14 @@ private:
     float mTheta = 1.5f*XM_PI;
     float mPhi = 0.2f*XM_PI;
     float mRadius = 15.0f;
-
+	float rotateY = 0.0f;
     POINT mLastMousePos;
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
     PSTR cmdLine, int showCmd)
 {
+
     // Enable run-time memory check for debug builds.
 #if defined(DEBUG) | defined(_DEBUG)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -142,6 +143,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
         MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
         return 0;
     }
+
 }
 
 ShapesApp::ShapesApp(HINSTANCE hInstance)
@@ -334,6 +336,7 @@ void ShapesApp::OnKeyboardInput(const GameTimer& gt)
 {
     if(GetAsyncKeyState('1') & 0x8000)
         mIsWireframe = true;
+		
     else
         mIsWireframe = false;
 }
@@ -363,16 +366,46 @@ void ShapesApp::UpdateObjectCBs(const GameTimer& gt)
 		// This needs to be tracked per frame resource.
 		if(e->NumFramesDirty > 0)
 		{
-			XMMATRIX world = XMLoadFloat4x4(&e->World);
+			//If you want cylinders to spin aswell
+			//if (e.get()->ObjCBIndex > 3)
 
-			ObjectConstants objConstants;
-			XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
+			//If you know sphere's CB location
+			if(e->ObjCBIndex==5|| e->ObjCBIndex==6 || e->ObjCBIndex == 9 || e->ObjCBIndex == 10 || e->ObjCBIndex == 13 
+				|| e->ObjCBIndex == 14 || e->ObjCBIndex == 17 || e->ObjCBIndex == 18 || e->ObjCBIndex == 21 
+				|| e->ObjCBIndex == 22)
+		
+			{
+				XMMATRIX world = XMLoadFloat4x4(&e->World);
+				XMMATRIX rot = XMMatrixRotationY(rotateY);
+				world = rot * world;
+				rotateY += 1.5;
+				ObjectConstants objConstants;
+				XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
 
-			currObjectCB->CopyData(e->ObjCBIndex, objConstants);
+				//Another way of rotation
+				/*XMMATRIX world = XMLoadFloat4x4(&e->World);
+				ObjectConstants objConstants;
+				rotateY += 1.5;
+				XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world) *XMMatrixRotationY(XMConvertToRadians(rotateY)));*/
 
-			// Next FrameResource need to be updated too.
-			e->NumFramesDirty--;
 
+				currObjectCB->CopyData(e->ObjCBIndex, objConstants);
+
+				// Next FrameResource need to be updated too.
+				e->NumFramesDirty--;
+			}
+			else
+			{
+				XMMATRIX world = XMLoadFloat4x4(&e->World);
+
+				ObjectConstants objConstants;
+				XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
+
+				currObjectCB->CopyData(e->ObjCBIndex, objConstants);
+
+				// Next FrameResource need to be updated too.
+				e->NumFramesDirty--;
+			}
 		}
 
 	}
@@ -405,6 +438,8 @@ void ShapesApp::UpdateMainPassCB(const GameTimer& gt)
 
 	auto currPassCB = mCurrFrameResource->PassCB.get();
 	currPassCB->CopyData(0, mMainPassCB);
+
+	
 
 }
 
@@ -681,7 +716,7 @@ void ShapesApp::BuildPSOs()
 		mShaders["opaquePS"]->GetBufferSize()
 	};
 	opaquePsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+    opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 	opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	opaquePsoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	opaquePsoDesc.SampleMask = UINT_MAX;
@@ -716,9 +751,8 @@ void ShapesApp::BuildRenderItems()
 {
 	//TO DO - Add the code to define each of the render items
 	//define the box render item
-
 	auto boxRitem = std::make_unique<RenderItem>();
-	XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f)*XMMatrixTranslation(0.0f, 0.5f, 0.0f));
+	XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(1.0f, 1.0f, 1.0f)*XMMatrixTranslation(0.0f, 0.2f, 0.0f));
 	boxRitem->ObjCBIndex = 0;
 	boxRitem->Geo = mGeometries["shapeGeo"].get();
 	boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -727,10 +761,21 @@ void ShapesApp::BuildRenderItems()
 	boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
 	mAllRitems.push_back(std::move(boxRitem));
 
+	//define the 2nd box render item
+	auto boxRitem1 = std::make_unique<RenderItem>();
+	XMStoreFloat4x4(&boxRitem1->World, XMMatrixScaling(0.5f, 0.5f, 0.5f)*XMMatrixTranslation(0.0f, 0.5f, 0.0f));
+	boxRitem1->ObjCBIndex = 1;
+	boxRitem1->Geo = mGeometries["shapeGeo"].get();
+	boxRitem1->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	boxRitem1->IndexCount = boxRitem1->Geo->DrawArgs["box"].IndexCount;
+	boxRitem1->StartIndexLocation = boxRitem1->Geo->DrawArgs["box"].StartIndexLocation;
+	boxRitem1->BaseVertexLocation = boxRitem1->Geo->DrawArgs["box"].BaseVertexLocation;
+	mAllRitems.push_back(std::move(boxRitem1));
+
 	//define the grid render item
 	auto gridRitem = std::make_unique<RenderItem>();
 	gridRitem->World = MathHelper::Identity4x4();
-	gridRitem->ObjCBIndex = 1;
+	gridRitem->ObjCBIndex = 2;
 	gridRitem->Geo = mGeometries["shapeGeo"].get();
 	gridRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	gridRitem->IndexCount = gridRitem->Geo->DrawArgs["grid"].IndexCount;
@@ -739,7 +784,7 @@ void ShapesApp::BuildRenderItems()
 	mAllRitems.push_back(std::move(gridRitem));
 
 	//define the columns and spheres
-	UINT objCBIndex = 2;
+	UINT objCBIndex = 3;
 	for (int i = 0; i < 5; ++i)
 	{
 		auto leftCylRitem = std::make_unique<RenderItem>();

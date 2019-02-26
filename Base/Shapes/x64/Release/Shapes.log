@@ -1,0 +1,10 @@
+﻿  d3dApp.cpp
+c:\users\cgf17gij\desktop\com428-lab4-master\com428-lab4-master\base\shapes\common\d3dapp.cpp(22): error C2065: 'opaquePsoDesc': undeclared identifier
+c:\users\cgf17gij\desktop\com428-lab4-master\com428-lab4-master\base\shapes\common\d3dapp.cpp(22): error C2228: left of '.FillMode' must have class/struct/union
+  c:\users\cgf17gij\desktop\com428-lab4-master\com428-lab4-master\base\shapes\common\d3dapp.cpp(22): note: type is 'unknown-type'
+  d3dUtil.cpp
+  GameTimer.cpp
+  GeometryGenerator.cpp
+  MathHelper.cpp
+  FrameResource.cpp
+  ShapesApp.cpp
